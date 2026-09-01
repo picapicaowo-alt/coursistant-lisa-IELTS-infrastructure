@@ -55,8 +55,9 @@ docs/                      Architecture, backend contract, runbooks, compliance
 2. Run the one-time [`docs/bootstrap-runbook.md`](docs/bootstrap-runbook.md).
 3. Configure the GitHub `test` environment and required repository variables.
 4. Copy `environments/test/terraform.tfvars.example` to a non-committed
-   `terraform.tfvars`, then provide the real domain, Route 53 zone, alert email,
-   and approved CIDRs.
+   `terraform.tfvars`, then provide the real domain, alert email, approved
+   CIDRs, and either a Route 53 zone or issued Tokyo ACM certificate for
+   externally managed DNS.
 5. Run `make check`, review `terraform plan`, and apply only to the test AWS
    account.
 6. Populate Secrets Manager without putting secret values in Terraform, GitHub

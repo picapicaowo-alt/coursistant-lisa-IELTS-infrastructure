@@ -3,6 +3,11 @@ output "application_url" {
   value       = "https://${var.domain_name}"
 }
 
+output "alb_dns_name" {
+  description = "ALB DNS target for an externally managed application CNAME."
+  value       = aws_lb.this.dns_name
+}
+
 output "alb_arn_suffix" {
   description = "ALB ARN suffix used by CloudWatch metrics."
   value       = aws_lb.this.arn_suffix

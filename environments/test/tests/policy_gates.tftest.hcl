@@ -47,7 +47,7 @@ override_data {
 }
 
 override_resource {
-  target = module.compute.aws_acm_certificate.this
+  target = module.compute.aws_acm_certificate.this[0]
   values = {
     arn = "arn:aws:acm:ap-northeast-1:123456789012:certificate/00000000-0000-0000-0000-000000000000"
     domain_validation_options = [
@@ -175,5 +175,21 @@ run "allow_approved_openai_test" {
   assert {
     condition     = var.ai_provider_mode == "openai"
     error_message = "The approved OpenAI test mode must be deployable."
+  }
+}
+
+run "allow_external_dns_with_issued_tokyo_certificate" {
+  command = plan
+
+  variables {
+    domain_name     = "test.example.com"
+    hosted_zone_id  = null
+    certificate_arn = "arn:aws:acm:ap-northeast-1:123456789012:certificate/00000000-0000-0000-0000-000000000000"
+    alarm_email     = "ops@example.com"
+  }
+
+  assert {
+    condition     = var.hosted_zone_id == null && var.certificate_arn != null
+    error_message = "External DNS mode must accept an issued Tokyo ACM certificate."
   }
 }

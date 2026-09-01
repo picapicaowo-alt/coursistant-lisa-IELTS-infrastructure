@@ -48,8 +48,25 @@ variable "domain_name" {
 }
 
 variable "hosted_zone_id" {
-  description = "Route 53 public hosted-zone ID containing domain_name."
+  description = "Optional Route 53 public hosted-zone ID containing domain_name. Null uses externally managed DNS."
   type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "certificate_arn" {
+  description = "Optional issued ACM certificate ARN in ap-northeast-1. Required when DNS is managed outside Route 53."
+  type        = string
+  default     = null
+  nullable    = true
+
+  validation {
+    condition = var.certificate_arn == null || can(regex(
+      "^arn:aws:acm:ap-northeast-1:[0-9]{12}:certificate/[0-9a-f-]+$",
+      var.certificate_arn,
+    ))
+    error_message = "certificate_arn must be an ACM certificate ARN from ap-northeast-1."
+  }
 }
 
 variable "alarm_email" {

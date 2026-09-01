@@ -28,10 +28,13 @@ data "aws_ami" "amazon_linux_2023" {
 }
 
 locals {
-  ami_id = var.ami_id == null ? data.aws_ami.amazon_linux_2023[0].id : var.ami_id
+  ami_id                   = var.ami_id == null ? data.aws_ami.amazon_linux_2023[0].id : var.ami_id
+  listener_certificate_arn = var.certificate_arn != null ? var.certificate_arn : try(aws_acm_certificate_validation.this[0].certificate_arn, "")
 }
 
 resource "aws_acm_certificate" "this" {
+  count = var.certificate_arn == null && var.hosted_zone_id != null ? 1 : 0
+
   domain_name       = var.domain_name
   validation_method = "DNS"
 
@@ -43,17 +46,21 @@ resource "aws_acm_certificate" "this" {
 }
 
 resource "aws_route53_record" "certificate_validation" {
+  count = var.certificate_arn == null && var.hosted_zone_id != null ? 1 : 0
+
   allow_overwrite = true
   zone_id         = var.hosted_zone_id
-  name            = one(aws_acm_certificate.this.domain_validation_options).resource_record_name
-  type            = one(aws_acm_certificate.this.domain_validation_options).resource_record_type
+  name            = one(aws_acm_certificate.this[0].domain_validation_options).resource_record_name
+  type            = one(aws_acm_certificate.this[0].domain_validation_options).resource_record_type
   ttl             = 60
-  records         = [one(aws_acm_certificate.this.domain_validation_options).resource_record_value]
+  records         = [one(aws_acm_certificate.this[0].domain_validation_options).resource_record_value]
 }
 
 resource "aws_acm_certificate_validation" "this" {
-  certificate_arn         = aws_acm_certificate.this.arn
-  validation_record_fqdns = [aws_route53_record.certificate_validation.fqdn]
+  count = var.certificate_arn == null && var.hosted_zone_id != null ? 1 : 0
+
+  certificate_arn         = aws_acm_certificate.this[0].arn
+  validation_record_fqdns = [aws_route53_record.certificate_validation[0].fqdn]
 }
 
 resource "aws_security_group" "alb" {
@@ -174,7 +181,14 @@ resource "aws_lb_listener" "https" {
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
-  certificate_arn   = aws_acm_certificate_validation.this.certificate_arn
+  certificate_arn   = local.listener_certificate_arn
+
+  lifecycle {
+    precondition {
+      condition     = local.listener_certificate_arn != ""
+      error_message = "Provide hosted_zone_id for Terraform-managed certificate validation or an issued Tokyo certificate_arn for external DNS."
+    }
+  }
 
   default_action {
     type             = "forward"
@@ -183,6 +197,8 @@ resource "aws_lb_listener" "https" {
 }
 
 resource "aws_route53_record" "application" {
+  count = var.hosted_zone_id != null ? 1 : 0
+
   zone_id = var.hosted_zone_id
   name    = var.domain_name
   type    = "A"

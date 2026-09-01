@@ -3,6 +3,11 @@ output "application_url" {
   value       = module.compute.application_url
 }
 
+output "alb_dns_name" {
+  description = "ALB DNS target to configure as a CNAME when DNS is external."
+  value       = module.compute.alb_dns_name
+}
+
 output "uploads_bucket" {
   description = "Private S3 bucket used by backend application objects."
   value       = module.storage.uploads_bucket_id

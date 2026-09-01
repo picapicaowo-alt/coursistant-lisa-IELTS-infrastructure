@@ -29,8 +29,17 @@ variable "domain_name" {
 }
 
 variable "hosted_zone_id" {
-  description = "Route 53 public hosted zone ID containing domain_name."
+  description = "Optional Route 53 public hosted zone ID containing domain_name. Null uses externally managed DNS."
   type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "certificate_arn" {
+  description = "Optional issued ACM certificate ARN in Tokyo. Required when DNS is managed outside Route 53."
+  type        = string
+  default     = null
+  nullable    = true
 }
 
 variable "allowed_ingress_ipv4_cidrs" {

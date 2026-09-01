@@ -44,3 +44,14 @@ environment secret `TFVARS_JSON`; it must not contain application/API secrets.
 After the first apply, migrate bootstrap state into the created S3 state bucket
 or store it in the organization's approved state system. Do not commit local
 state.
+
+## DNS modes
+
+If the application domain is in Route 53, set `hosted_zone_id` and Terraform
+will create the ACM validation record and ALB alias.
+
+If DNS is managed by an external registrar, first request and validate an ACM
+certificate in `ap-northeast-1`. Set its issued ARN as `certificate_arn` and
+leave `hosted_zone_id = null`. After apply, create a CNAME from the application
+subdomain to the `alb_dns_name` Terraform output. Do not point an apex/root
+domain at the ALB through a registrar that lacks ALIAS/ANAME support.

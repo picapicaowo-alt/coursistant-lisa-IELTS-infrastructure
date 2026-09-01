@@ -28,6 +28,13 @@ check "capacity_bounds" {
   }
 }
 
+check "tls_dns_configuration" {
+  assert {
+    condition     = var.hosted_zone_id != null || var.certificate_arn != null
+    error_message = "Provide hosted_zone_id for Terraform-managed DNS/TLS or an issued Tokyo certificate_arn for external DNS."
+  }
+}
+
 data "aws_iam_policy_document" "environment_kms" {
   #checkov:skip=CKV_AWS_109:The account-root KMS statement is the AWS default delegation pattern; IAM policies remain the authorization boundary.
   #checkov:skip=CKV_AWS_111:The account-root KMS statement must permit key administration so the account can delegate scoped use through IAM.
@@ -197,6 +204,7 @@ module "compute" {
   private_subnet_ids                = module.network.private_subnet_ids
   domain_name                       = var.domain_name
   hosted_zone_id                    = var.hosted_zone_id
+  certificate_arn                   = var.certificate_arn
   allowed_ingress_ipv4_cidrs        = var.allowed_ingress_ipv4_cidrs
   ami_id                            = var.ami_id
   instance_type                     = var.instance_type
