@@ -21,15 +21,6 @@ locals {
   vpc_flow_log_group_name    = "/${var.project}/${var.environment}/vpc-flow"
 }
 
-check "openai_geography_gate" {
-  assert {
-    condition = var.ai_provider_mode != "openai" || (
-      !var.mainland_end_users && var.openai_supported_end_users_confirmed
-    )
-    error_message = "OpenAI cannot be enabled for mainland-China end users and requires explicit supported-user confirmation."
-  }
-}
-
 check "capacity_bounds" {
   assert {
     condition     = var.min_size <= var.desired_capacity && var.desired_capacity <= var.max_size
@@ -141,7 +132,7 @@ resource "aws_secretsmanager_secret" "backend_runtime" {
 resource "aws_secretsmanager_secret" "ai_provider" {
   #checkov:skip=CKV2_AWS_57:Provider credentials have provider-owned rotation APIs; no generic rotation Lambda can safely rotate every supported provider.
   name                    = "${local.name_prefix}/ai/provider"
-  description             = "Approved AI provider settings; keep without a value while disabled."
+  description             = "Approved AI provider settings populated out of band."
   kms_key_id              = aws_kms_key.environment.arn
   recovery_window_in_days = 30
   tags                    = local.common_tags

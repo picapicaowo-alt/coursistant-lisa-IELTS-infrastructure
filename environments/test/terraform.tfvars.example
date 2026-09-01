@@ -31,7 +31,5 @@ uploads_noncurrent_expiration_days = 30
 artifacts_noncurrent_expiration_days = 30
 audit_expiration_days              = 90
 
-# Safe default for a mainland-China test. Do not put provider keys here.
-ai_provider_mode                    = "disabled"
-mainland_end_users                  = true
-openai_supported_end_users_confirmed = false
+# Approved closed-test provider. Do not put provider keys here.
+ai_provider_mode = "openai"

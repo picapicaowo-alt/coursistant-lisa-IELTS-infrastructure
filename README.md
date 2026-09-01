@@ -7,13 +7,16 @@ The initial target is a closed test of approximately 300 person-sessions. The
 default compute size is `m7i.xlarge` (4 vCPU, 16 GiB), but concurrency tests—not
 the participant count—are the authority for resizing.
 
-## Important safety boundary
+## AI test boundary
 
-The stack is provider-neutral and deploys with `AI_PROVIDER_MODE=disabled`.
-Putting a server in Tokyo does not make OpenAI available to mainland-China end
-users. Terraform rejects `ai_provider_mode = "openai"` when
-`mainland_end_users = true`, and also requires an explicit supported-user
-confirmation for any OpenAI deployment.
+The approved closed-test configuration deploys with `AI_PROVIDER_MODE=openai`.
+The provider credential is still absent until an authorized operator populates
+the dedicated Secrets Manager value. `AI_PROVIDER_MODE=disabled` remains the
+emergency kill switch and must be tested before inviting users.
+
+Provider availability and end-user geography remain an account/compliance
+approval record rather than a Terraform hard block. The owner must preserve the
+approval evidence and re-review it before expanding beyond the closed test.
 
 No application secret value is managed in Terraform. Terraform creates empty
 AWS Secrets Manager containers; authorized operators populate them out of band.

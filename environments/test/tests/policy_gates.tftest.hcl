@@ -131,7 +131,7 @@ override_data {
   }
 }
 
-run "safe_mainland_defaults" {
+run "approved_openai_default" {
   command = plan
 
   variables {
@@ -141,45 +141,39 @@ run "safe_mainland_defaults" {
   }
 
   assert {
+    condition     = var.ai_provider_mode == "openai"
+    error_message = "The approved closed test must default to OpenAI."
+  }
+}
+
+run "allow_explicit_ai_disable_kill_switch" {
+  command = plan
+
+  variables {
+    domain_name      = "test.example.com"
+    hosted_zone_id   = "Z0000000000000000000"
+    alarm_email      = "ops@example.com"
+    ai_provider_mode = "disabled"
+  }
+
+  assert {
     condition     = var.ai_provider_mode == "disabled"
-    error_message = "The test environment must default to AI disabled."
-  }
-
-  assert {
-    condition     = var.mainland_end_users
-    error_message = "The safe test default must assume mainland end users."
+    error_message = "Operators must retain an explicit AI kill-switch mode."
   }
 }
 
-run "reject_openai_for_mainland_users" {
+run "allow_approved_openai_test" {
   command = plan
 
   variables {
-    domain_name                          = "test.example.com"
-    hosted_zone_id                       = "Z0000000000000000000"
-    alarm_email                          = "ops@example.com"
-    ai_provider_mode                     = "openai"
-    mainland_end_users                   = true
-    openai_supported_end_users_confirmed = true
-  }
-
-  expect_failures = [check.openai_geography_gate]
-}
-
-run "allow_openai_only_after_supported_user_confirmation" {
-  command = plan
-
-  variables {
-    domain_name                          = "test.example.com"
-    hosted_zone_id                       = "Z0000000000000000000"
-    alarm_email                          = "ops@example.com"
-    ai_provider_mode                     = "openai"
-    mainland_end_users                   = false
-    openai_supported_end_users_confirmed = true
+    domain_name      = "test.example.com"
+    hosted_zone_id   = "Z0000000000000000000"
+    alarm_email      = "ops@example.com"
+    ai_provider_mode = "openai"
   }
 
   assert {
-    condition     = var.ai_provider_mode == "openai" && !var.mainland_end_users && var.openai_supported_end_users_confirmed
-    error_message = "OpenAI must require supported-user confirmation and no mainland end users."
+    condition     = var.ai_provider_mode == "openai"
+    error_message = "The approved OpenAI test mode must be deployable."
   }
 }

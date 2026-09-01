@@ -11,7 +11,7 @@ owns the exact provider SDK, but these canonical keys keep deployment portable:
 
 | Key | Required | Purpose |
 |---|---|---|
-| `AI_PROVIDER` | Yes | `disabled`, an approved mainland provider identifier, or gated `openai` |
+| `AI_PROVIDER` | Yes | `disabled`, an approved mainland provider identifier, or `openai` |
 | `AI_BASE_URL` | Provider-dependent | Server-side provider endpoint |
 | `AI_API_KEY` | Provider-dependent | Provider credential; never returned to the browser |
 | `AI_MODEL` | Yes when enabled | Explicit allowlisted model/snapshot |

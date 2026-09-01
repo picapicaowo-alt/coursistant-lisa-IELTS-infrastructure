@@ -9,9 +9,9 @@ the Coursistant IELTS testing environment.
   emergency recovery only and must be reconciled back into code.
 - `test` is the only environment currently authorized. Do not create or mutate
   production resources from this repository.
-- OpenAI must remain disabled for mainland-China end users unless Coursistant
-  has written confirmation from OpenAI and applicable counsel that the exact
-  use is permitted. A Tokyo server is not a geographic-policy bypass.
+- OpenAI is approved for the current closed test. Preserve the approval record,
+  server-side credential boundary, usage limits, and tested `disabled` kill
+  switch; re-review provider terms before expanding the test scope.
 - S3 buckets remain private. Browser access must use authenticated backend
   authorization and short-lived presigned URLs.
 - Use GitHub OIDC and AWS IAM roles. Do not create long-lived CI access keys.

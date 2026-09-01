@@ -177,26 +177,14 @@ variable "monthly_budget_usd" {
 }
 
 variable "ai_provider_mode" {
-  description = "AI provider mode. Keep disabled until the documented gate is approved."
+  description = "AI provider mode approved for the test environment."
   type        = string
-  default     = "disabled"
+  default     = "openai"
 
   validation {
     condition     = contains(["disabled", "mainland-approved", "openai"], var.ai_provider_mode)
     error_message = "ai_provider_mode must be disabled, mainland-approved, or openai."
   }
-}
-
-variable "mainland_end_users" {
-  description = "Whether any test end users are located in mainland China."
-  type        = bool
-  default     = true
-}
-
-variable "openai_supported_end_users_confirmed" {
-  description = "Recorded confirmation that every OpenAI end user is in a supported country."
-  type        = bool
-  default     = false
 }
 
 variable "uploads_noncurrent_expiration_days" {

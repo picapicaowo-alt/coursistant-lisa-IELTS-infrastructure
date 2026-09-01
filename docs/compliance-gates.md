@@ -1,19 +1,23 @@
-# AI and mainland-China compliance gates
+# AI closed-test approval and operational controls
 
 This is an engineering control, not legal advice.
 
-## Default
+## Approved default
 
-`AI_PROVIDER_MODE=disabled`. No AI provider credential is created or populated
-by Terraform.
+Coursistant approved OpenAI for the closed test on 2026-09-01. The environment
+therefore defaults to `AI_PROVIDER_MODE=openai`. No AI provider credential is
+created or populated by Terraform; an authorized operator stores it directly
+in Secrets Manager.
 
-## OpenAI gate
+## Approval record
 
-Do not set `ai_provider_mode = "openai"` for mainland-China end users. Terraform
-will reject that combination. A Tokyo EC2 address does not change the location
-of Coursistant end users or make an unsupported geography supported.
+Terraform no longer blocks the approved OpenAI test based on end-user
+geography. This changes an engineering deployment control, not OpenAI's terms
+or applicable law. OpenAI's published supported-country guidance currently
+warns that accessing or offering access outside its list may lead to account
+suspension; the accountable owner must retain any exception/approval evidence.
 
-OpenAI can be selected only when all of the following are recorded:
+Before expanding the test, record:
 
 1. The exact end-user countries are supported by OpenAI.
 2. Coursistant has confirmed its account, payment method, and customer entity
@@ -22,9 +26,10 @@ OpenAI can be selected only when all of the following are recorded:
    transfer.
 4. Student names, contact details, grades, submissions, and raw attachments are
    excluded unless a separately approved data flow permits them.
-5. `openai_supported_end_users_confirmed = true` is approved in review.
+5. The approving owner, date, scope, participant limit, and emergency stop
+   decision.
 
-## Mainland pilot gate
+## Mainland pilot review
 
 For a mainland-China pilot, select a provider that is contractually and
 operationally available for that use. Before enabling it, document:
