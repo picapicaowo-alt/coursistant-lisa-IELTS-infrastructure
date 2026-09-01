@@ -50,3 +50,13 @@ Terraform source is the infrastructure authority. Revert the relevant Git
 commit, review the resulting plan, then apply through the protected workflow.
 Do not use `terraform destroy` as a rollback mechanism. Buckets and KMS keys
 have deletion protections/recovery windows and are intentionally not ephemeral.
+
+## Recorded test-environment exceptions
+
+- S3 cross-region replication is disabled to keep student/test data within the
+  approved Tokyo boundary. A second-region copy requires a separate compliance,
+  retention, and cost decision.
+- The provider-neutral Secrets Manager containers do not attach a generic
+  automatic-rotation Lambda. Backend and AI credentials rotate through their
+  owning provider workflows; record dates and evidence in the operational
+  handoff.

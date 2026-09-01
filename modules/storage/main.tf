@@ -8,6 +8,7 @@ locals {
 data "aws_partition" "current" {}
 
 resource "aws_s3_bucket" "uploads" {
+  #checkov:skip=CKV_AWS_144:Cross-region replication is intentionally excluded from the Tokyo-only test data boundary.
   bucket = local.uploads_bucket_name
 
   lifecycle {
@@ -20,6 +21,7 @@ resource "aws_s3_bucket" "uploads" {
 }
 
 resource "aws_s3_bucket" "artifacts" {
+  #checkov:skip=CKV_AWS_144:Git is the source authority and immutable test artifacts remain in the approved Tokyo region.
   bucket = local.artifacts_bucket_name
 
   lifecycle {
@@ -32,6 +34,7 @@ resource "aws_s3_bucket" "artifacts" {
 }
 
 resource "aws_s3_bucket" "audit" {
+  #checkov:skip=CKV_AWS_144:Test audit logs remain in Tokyo; cross-region transfer requires a separate compliance decision.
   bucket = local.audit_bucket_name
 
   lifecycle {
@@ -41,6 +44,17 @@ resource "aws_s3_bucket" "audit" {
   tags = merge(var.tags, {
     DataClass = "audit-logs"
   })
+}
+
+resource "aws_s3_bucket_notification" "this" {
+  for_each = {
+    uploads   = aws_s3_bucket.uploads.id
+    artifacts = aws_s3_bucket.artifacts.id
+    audit     = aws_s3_bucket.audit.id
+  }
+
+  bucket      = each.value
+  eventbridge = true
 }
 
 resource "aws_s3_bucket_public_access_block" "this" {

@@ -18,11 +18,17 @@ locals {
 }
 
 resource "aws_s3_bucket" "terraform_state" {
+  #checkov:skip=CKV_AWS_144:The Tokyo test state is intentionally single-region; approved external state backup is handled by the account owner.
   bucket = local.state_bucket_name
 
   lifecycle {
     prevent_destroy = true
   }
+}
+
+resource "aws_s3_bucket_notification" "terraform_state" {
+  bucket      = aws_s3_bucket.terraform_state.id
+  eventbridge = true
 }
 
 resource "aws_s3_bucket_public_access_block" "terraform_state" {

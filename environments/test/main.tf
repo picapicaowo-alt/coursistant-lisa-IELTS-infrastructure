@@ -74,7 +74,10 @@ data "aws_iam_policy_document" "environment_kms" {
     condition {
       test     = "ArnLike"
       variable = "kms:EncryptionContext:aws:logs:arn"
-      values   = ["arn:${data.aws_partition.current.partition}:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/${var.project}/${var.environment}/*"]
+      values = [
+        "arn:${data.aws_partition.current.partition}:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/${var.project}/${var.environment}/*",
+        "arn:${data.aws_partition.current.partition}:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:aws-waf-logs-${local.name_prefix}",
+      ]
     }
   }
 
@@ -125,6 +128,7 @@ resource "aws_kms_alias" "environment" {
 }
 
 resource "aws_secretsmanager_secret" "backend_runtime" {
+  #checkov:skip=CKV2_AWS_57:This provider-neutral secret has no rotation Lambda; the backend owner rotates its independent credentials under the runbook.
   name                    = "${local.name_prefix}/backend/runtime"
   description             = "Backend runtime settings; values are populated out of band."
   kms_key_id              = aws_kms_key.environment.arn
@@ -133,6 +137,7 @@ resource "aws_secretsmanager_secret" "backend_runtime" {
 }
 
 resource "aws_secretsmanager_secret" "ai_provider" {
+  #checkov:skip=CKV2_AWS_57:Provider credentials have provider-owned rotation APIs; no generic rotation Lambda can safely rotate every supported provider.
   name                    = "${local.name_prefix}/ai/provider"
   description             = "Approved AI provider settings; keep without a value while disabled."
   kms_key_id              = aws_kms_key.environment.arn
