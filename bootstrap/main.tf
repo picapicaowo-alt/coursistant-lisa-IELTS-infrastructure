@@ -17,10 +17,29 @@ locals {
   )
 }
 
+data "aws_iam_policy_document" "terraform_state_kms" {
+  #checkov:skip=CKV_AWS_109:The account-root KMS statement is the AWS default delegation pattern; IAM policies remain the authorization boundary.
+  #checkov:skip=CKV_AWS_111:The account-root KMS statement must permit key administration so the account can delegate scoped use through IAM.
+  #checkov:skip=CKV_AWS_356:KMS key policies require Resource "*" because the policy is already attached to exactly one key.
+  statement {
+    sid    = "EnableAccountIamPolicies"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
+
+    actions   = ["kms:*"]
+    resources = ["*"]
+  }
+}
+
 resource "aws_kms_key" "terraform_state" {
   description             = "Coursistant IELTS Terraform state encryption"
   deletion_window_in_days = 30
   enable_key_rotation     = true
+  policy                  = data.aws_iam_policy_document.terraform_state_kms.json
 
   lifecycle {
     prevent_destroy = true
