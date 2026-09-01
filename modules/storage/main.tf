@@ -35,6 +35,7 @@ resource "aws_s3_bucket" "artifacts" {
 
 resource "aws_s3_bucket" "audit" {
   #checkov:skip=CKV_AWS_144:Test audit logs remain in Tokyo; cross-region transfer requires a separate compliance decision.
+  #checkov:skip=CKV_AWS_145:ALB access-log delivery requires S3-managed default encryption; CloudTrail objects explicitly use the environment KMS key.
   bucket = local.audit_bucket_name
 
   lifecycle {

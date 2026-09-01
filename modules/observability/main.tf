@@ -1,7 +1,51 @@
+data "aws_partition" "current" {}
+
 resource "aws_sns_topic" "alarms" {
   name              = "${var.name_prefix}-alarms"
   kms_master_key_id = "alias/aws/sns"
   tags              = var.tags
+}
+
+resource "aws_cloudwatch_log_group" "cloudtrail" {
+  name              = var.cloudtrail_log_group_name
+  retention_in_days = 365
+  kms_key_id        = var.cloudtrail_kms_key_arn
+  tags              = var.tags
+}
+
+data "aws_iam_policy_document" "cloudtrail_assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudtrail.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "cloudtrail_logs" {
+  name               = "${var.name_prefix}-cloudtrail-logs"
+  assume_role_policy = data.aws_iam_policy_document.cloudtrail_assume_role.json
+  tags               = var.tags
+}
+
+data "aws_iam_policy_document" "cloudtrail_logs" {
+  statement {
+    sid = "WriteCloudTrailLogStreams"
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+    resources = ["${aws_cloudwatch_log_group.cloudtrail.arn}:*"]
+  }
+}
+
+resource "aws_iam_role_policy" "cloudtrail_logs" {
+  name   = "${var.name_prefix}-cloudtrail-logs"
+  role   = aws_iam_role.cloudtrail_logs.id
+  policy = data.aws_iam_policy_document.cloudtrail_logs.json
 }
 
 resource "aws_sns_topic_subscription" "email" {
@@ -20,6 +64,8 @@ resource "aws_cloudtrail" "this" {
   enable_logging                = true
   kms_key_id                    = var.cloudtrail_kms_key_arn
   sns_topic_name                = aws_sns_topic.alarms.name
+  cloud_watch_logs_group_arn    = "${aws_cloudwatch_log_group.cloudtrail.arn}:*"
+  cloud_watch_logs_role_arn     = aws_iam_role.cloudtrail_logs.arn
 
   event_selector {
     include_management_events = true

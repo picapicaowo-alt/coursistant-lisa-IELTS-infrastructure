@@ -103,6 +103,34 @@ override_data {
   }
 }
 
+override_data {
+  target = module.network.data.aws_iam_policy_document.flow_logs_assume_role
+  values = {
+    json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
+  }
+}
+
+override_data {
+  target = module.network.data.aws_iam_policy_document.flow_logs
+  values = {
+    json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
+  }
+}
+
+override_data {
+  target = module.observability.data.aws_iam_policy_document.cloudtrail_assume_role
+  values = {
+    json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
+  }
+}
+
+override_data {
+  target = module.observability.data.aws_iam_policy_document.cloudtrail_logs
+  values = {
+    json = "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
+  }
+}
+
 run "safe_mainland_defaults" {
   command = plan
 

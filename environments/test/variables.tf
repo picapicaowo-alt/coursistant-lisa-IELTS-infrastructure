@@ -164,12 +164,6 @@ variable "cors_allowed_origins" {
   default     = []
 }
 
-variable "enable_waf" {
-  description = "Enable WAF managed common rules and IP rate limiting."
-  type        = bool
-  default     = true
-}
-
 variable "waf_rate_limit_per_five_minutes" {
   description = "Maximum WAF requests per source IP in five minutes."
   type        = number

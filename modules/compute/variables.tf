@@ -154,12 +154,6 @@ variable "backend_health_metric_environment" {
   type        = string
 }
 
-variable "enable_waf" {
-  description = "Associate AWS WAF managed rules and rate limiting with the ALB."
-  type        = bool
-  default     = true
-}
-
 variable "waf_rate_limit_per_five_minutes" {
   description = "Maximum requests per source IP in a five-minute WAF window."
   type        = number

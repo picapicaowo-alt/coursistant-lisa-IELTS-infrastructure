@@ -25,7 +25,6 @@ lms_api_port       = 8083
 ai_agent_port      = 8090
 study_support_port = 8091
 
-enable_waf                         = true
 waf_rate_limit_per_five_minutes    = 2000
 monthly_budget_usd                 = 400
 uploads_noncurrent_expiration_days = 30

@@ -23,6 +23,11 @@ variable "cloudtrail_kms_key_arn" {
   type        = string
 }
 
+variable "cloudtrail_log_group_name" {
+  description = "Pre-approved CloudWatch log-group name for CloudTrail events."
+  type        = string
+}
+
 variable "audit_bucket_id" {
   description = "S3 bucket receiving CloudTrail management events."
   type        = string

@@ -34,6 +34,11 @@ variable "high_availability_nat" {
   default     = false
 }
 
+variable "flow_log_group_arn" {
+  description = "Encrypted CloudWatch log-group ARN receiving VPC Flow Logs."
+  type        = string
+}
+
 variable "tags" {
   description = "Additional tags applied to all network resources."
   type        = map(string)

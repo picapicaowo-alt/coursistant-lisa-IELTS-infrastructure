@@ -17,6 +17,8 @@ locals {
   }
   nginx_log_group_name       = "/${var.project}/${var.environment}/nginx"
   application_log_group_name = "/${var.project}/${var.environment}/application"
+  cloudtrail_log_group_name  = "/${var.project}/${var.environment}/cloudtrail"
+  vpc_flow_log_group_name    = "/${var.project}/${var.environment}/vpc-flow"
 }
 
 check "openai_geography_gate" {
@@ -159,6 +161,13 @@ resource "aws_cloudwatch_log_group" "application" {
   tags              = local.common_tags
 }
 
+resource "aws_cloudwatch_log_group" "vpc_flow" {
+  name              = local.vpc_flow_log_group_name
+  retention_in_days = 365
+  kms_key_id        = aws_kms_key.environment.arn
+  tags              = local.common_tags
+}
+
 module "network" {
   source = "../../modules/network"
 
@@ -168,6 +177,7 @@ module "network" {
   public_subnet_cidrs   = var.public_subnet_cidrs
   private_subnet_cidrs  = var.private_subnet_cidrs
   high_availability_nat = var.high_availability_nat
+  flow_log_group_arn    = aws_cloudwatch_log_group.vpc_flow.arn
   tags                  = local.common_tags
 }
 
@@ -218,7 +228,6 @@ module "compute" {
   application_log_group_name        = local.application_log_group_name
   backend_health_metric_namespace   = "Coursistant/Backend"
   backend_health_metric_environment = var.environment
-  enable_waf                        = var.enable_waf
   waf_rate_limit_per_five_minutes   = var.waf_rate_limit_per_five_minutes
   tags                              = local.common_tags
 
@@ -237,6 +246,7 @@ module "observability" {
   account_id                        = data.aws_caller_identity.current.account_id
   cloudtrail_name                   = local.cloudtrail_name
   cloudtrail_kms_key_arn            = aws_kms_key.environment.arn
+  cloudtrail_log_group_name         = local.cloudtrail_log_group_name
   audit_bucket_id                   = module.storage.audit_bucket_id
   autoscaling_group_name            = module.compute.autoscaling_group_name
   alb_arn_suffix                    = module.compute.alb_arn_suffix

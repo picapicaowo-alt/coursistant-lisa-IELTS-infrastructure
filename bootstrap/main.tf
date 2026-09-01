@@ -17,8 +17,24 @@ locals {
   )
 }
 
+resource "aws_kms_key" "terraform_state" {
+  description             = "Coursistant IELTS Terraform state encryption"
+  deletion_window_in_days = 30
+  enable_key_rotation     = true
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_kms_alias" "terraform_state" {
+  name          = "alias/${local.name_prefix}-terraform-state"
+  target_key_id = aws_kms_key.terraform_state.key_id
+}
+
 resource "aws_s3_bucket" "terraform_state" {
   #checkov:skip=CKV_AWS_144:The Tokyo test state is intentionally single-region; approved external state backup is handled by the account owner.
+  #checkov:skip=CKV_AWS_18:Dedicated access-log buckets create recursive bootstrap dependencies; state access is governed by OIDC IAM and audited by the account trail.
   bucket = local.state_bucket_name
 
   lifecycle {
@@ -61,9 +77,33 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" 
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      kms_master_key_id = aws_kms_key.terraform_state.arn
+      sse_algorithm     = "aws:kms"
+    }
+
+    bucket_key_enabled = true
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "terraform_state" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  rule {
+    id     = "retain-state-history"
+    status = "Enabled"
+
+    filter {}
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+
+    noncurrent_version_expiration {
+      noncurrent_days = 365
     }
   }
+
+  depends_on = [aws_s3_bucket_versioning.terraform_state]
 }
 
 data "aws_iam_policy_document" "state_bucket" {
@@ -196,6 +236,17 @@ data "aws_iam_policy_document" "state_access" {
       "s3:PutObject",
     ]
     resources = ["${aws_s3_bucket.terraform_state.arn}/*"]
+  }
+
+  statement {
+    sid = "UseStateKmsKey"
+    actions = [
+      "kms:Decrypt",
+      "kms:DescribeKey",
+      "kms:Encrypt",
+      "kms:GenerateDataKey",
+    ]
+    resources = [aws_kms_key.terraform_state.arn]
   }
 }
 
