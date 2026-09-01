@@ -1,0 +1,38 @@
+aws_region    = "ap-northeast-1"
+project       = "coursistant-ielts"
+environment   = "test"
+owner         = "coursistant"
+
+domain_name   = "test.example.com"
+hosted_zone_id = "Z0000000000000000000"
+alarm_email    = "ops@example.com"
+
+vpc_cidr             = "10.42.0.0/16"
+public_subnet_cidrs  = ["10.42.0.0/24", "10.42.1.0/24"]
+private_subnet_cidrs = ["10.42.10.0/24", "10.42.11.0/24"]
+high_availability_nat = false
+
+allowed_ingress_ipv4_cidrs = ["0.0.0.0/0"]
+cors_allowed_origins        = ["https://test.example.com"]
+
+instance_type        = "m7i.xlarge"
+root_volume_size_gib = 100
+desired_capacity     = 1
+min_size             = 1
+max_size             = 2
+
+lms_api_port       = 8083
+ai_agent_port      = 8090
+study_support_port = 8091
+
+enable_waf                         = true
+waf_rate_limit_per_five_minutes    = 2000
+monthly_budget_usd                 = 400
+uploads_noncurrent_expiration_days = 30
+artifacts_noncurrent_expiration_days = 30
+audit_expiration_days              = 90
+
+# Safe default for a mainland-China test. Do not put provider keys here.
+ai_provider_mode                    = "disabled"
+mainland_end_users                  = true
+openai_supported_end_users_confirmed = false

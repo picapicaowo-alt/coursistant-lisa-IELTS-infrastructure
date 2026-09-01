@@ -1,0 +1,10 @@
+aws_region         = "ap-northeast-1"
+project            = "coursistant-ielts"
+github_organization = "picapicaowo-alt"
+github_repository   = "coursistant-lisa-IELTS-infrastructure"
+github_environment  = "test"
+state_bucket_prefix = "coursistant-ielts-terraform-state"
+
+# If this AWS account already has the standard GitHub Actions OIDC provider,
+# reuse it instead of creating a duplicate.
+existing_github_oidc_provider_arn = null
